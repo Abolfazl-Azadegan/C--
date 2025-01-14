@@ -28,7 +28,7 @@ int main(){
               << std::endl; 
 
     /*----------------------------------- Note 6-----------------------------------------*/
-    /* By using below command we can remove std:: at the beginning of our commands.
+    /* By using below command we can remove 'std::' at the beginning of our commands.
     std:: means we are using standard library in our code*/
 
     // using namespace std; 
