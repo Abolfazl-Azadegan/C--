@@ -14,14 +14,13 @@ int main(){
     cout << "The x3 is: " << x3 << endl;
     cout << "The x4 is: " << x4 << endl;
 
-    // Below code will remove the number after decimal point and keep the real number so it will do the auto type casting.
+    // Below code will remove the number after decimal point and keep the real number so it will do the narrowing conversions.
     int y1 = 5.1;
-    // Below code will avoid any unintended type casting
-    // This will generate error
+    // Below code will avoid any unintended narrowing conversions
+    // Below code will generate error
     // int y2 {5.1};
     int y3(5.1);
-    // This will generate error
-    // int y2 {5.1};
+    // Below code will generate error
     // int y4 = {5.1};
 
     cout << "The y1 is: " << y1 << endl;
