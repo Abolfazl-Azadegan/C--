@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
     // Brace initialization with narrowing prevention
-    int x {5.5};  // Error: narrowing conversion not allowed
+ //   int x {5.5};  // Error: narrowing conversion not allowed
     int y = 5.5;  // Allowed: narrowing conversion (y becomes 5)
 
     int z {10};   // Brace initialization (safe at initialization)
