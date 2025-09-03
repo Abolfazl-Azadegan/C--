@@ -16,5 +16,6 @@ int main(){
     std::cout << "First Number is: " << fir_num << std::endl;
     std::cout << "Second Number is: " << sec_num << std::endl;
     std::cout << "Sum of two numbers is: " << sum(fir_num, sec_num) << std::endl;
+    std::cout << "Sum of 10 and 20 is: " << sum(10, 20) << std::endl;
 }
 

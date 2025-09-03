@@ -1,0 +1,350 @@
+// In C++ we usually read input into std::string objects, e.g.:
+// std::string s;
+// std::cin >> s;
+// But sometimes we want exactly N characters (even if spaces or newlines are included).
+// The normal >> operator won’t work for that, because it skips whitespace and stops at spaces.
+// That’s where cin.get() is used.
+
+
+// 2. cin.get() behavior
+    // cin.get() has multiple forms:
+        // cin.get() → reads one single character.
+        // cin.get(char* buffer, int size) → reads up to size-1 characters into a C-style char array.
+
+    // cin.get(char* buffer, int size) requires a char array, because it places characters directly in that memory.
+        // char buffer[11]; // array of 11 chars
+        // std::cin.get(buffer, 11); // read up to 10 characters (one spot left for '\0')
+
+    // Now buffer contains those characters as a C-string (null-terminated).
+    // But if you want a std::string (the C++ object), you must convert:
+        // std::string s(buffer);
+
+/*
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    char buffer[11]; // reserve space for 10 chars + null terminator
+
+    cout << "Enter text: ";
+    cin.get(buffer, 11); // reads up to 10 chars (stops before newline or size)
+
+    string s(buffer); // convert char array to std::string
+    cout << "You entered: " << s << endl;
+
+    return 0;
+}
+*/
+/*
+If you type:
+    Hello World!
+
+It will only read:
+    Hello Worl
+
+(10 characters).
+*/
+
+/*
+Summary:
+    cin.get() with parameters needs a char array.
+    It cannot write directly into a std::string.
+*/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+You can save into a std::string, but the catch is:
+
+cin.get(char* buffer, int size) is an old C-style function.
+
+It expects a raw memory buffer (char[]) where it will physically copy characters.
+
+A std::string is an object, not just a raw character array. You cannot pass it directly, because cin.get doesn’t know how to 
+“fill” the internals of the object safely.
+*/
+
+/*
+1. Why std::string doesn’t work with cin.get
+    If you try this:
+    string s;
+    cin.get(s, 11);  // ❌ error: no matching function
+    It won’t compile, because there is no overload of cin.get that accepts a std::string.
+*/
+
+/*
+2. But there is an alternative: cin.read()
+    C++ gives another method designed for reading raw characters into memory that works better with std::string.
+
+    Example:
+
+    #include <iostream>
+    #include <string>
+    using namespace std;
+
+    int main() {
+        string s(10, '\0'); // make a string with 10 slots (filled with '\0')
+
+        cout << "Enter text: ";
+        cin.read(&s[0], 10); // read 10 characters directly into the string’s buffer
+
+        cout << "You entered: " << s << endl;
+        return 0;
+    }
+
+    If you type:
+        Hello World!
+
+
+    It will output:
+        Hello Worl
+
+    👉 Here we avoided the intermediate char array — we read directly into the std::string memory.
+*/
+
+/*
+3. When to use which
+
+    Use cin.get(char*, int) → if you’re working with raw C-style arrays.
+    Use cin.read(&s[0], n) → if you want to read directly into a std::string.
+*/
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+1. What is char[]?
+
+    char[] is a C-style character array.
+
+    It is literally a block of memory that can hold multiple characters (letters, digits, symbols, spaces).
+
+    Example:
+    char word[6]; 
+    This reserves 6 bytes in memory (1 byte per char).
+*/
+
+/*
+2. Why is it special for text?
+
+    In C and C++, strings in the C-style are just arrays of characters ending with a special character: '\0' (null terminator).
+    So, if we write:
+    char word[6] = "Hello";
+
+    Memory looks like this:
+
+    Index	Value
+    0	'H'
+    1	'e'
+    2	'l'
+    3	'l'
+    4	'o'
+    5	'\0'
+
+    👉 That '\0' tells functions where the string ends.
+*/
+
+/*
+Example of risk with char[]:
+
+char name[5];
+cin >> name; // if you type "Hello", overflow happens (needs 6 chars: "Hello\0")
+
+Quick analogy
+
+char[] → Like a fixed-size box of letters; you must decide the size before writing, and you must put a “THE END” card ('\0') yourself.
+
+std::string → Like a flexible notebook that can grow automatically and keeps track of its own ending.
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+1. What is function overloading?
+
+    In C++, overloading means you can define multiple functions with the same name, but with different parameter lists.
+    The compiler then decides which version to call depending on the arguments you pass.
+
+    Example:
+
+        #include <iostream>
+        using namespace std;
+
+        void print(int x) {
+            cout << "Integer: " << x << endl;
+        }
+
+        void print(double y) {
+            cout << "Double: " << y << endl;
+        }
+
+        void print(string s) {
+            cout << "String: " << s << endl;
+        }
+
+        int main() {
+            print(5);        // calls print(int)
+            print(3.14);     // calls print(double)
+            print("Hello");  // calls print(string)
+        }
+
+Here print is overloaded with 3 different signatures:
+
+    print(int)
+    print(double)
+    print(string)
+
+
+
+2. How it applies to cin.get
+
+    The standard library has several overloads of cin.get.
+    Some of them are:
+
+        cin.get() → reads one character.
+        cin.get(char &c) → stores one character in a variable you provide.
+        cin.get(char* buffer, int size) → reads up to size-1 characters into a character array.
+
+    👉 Notice: there is no version (overload) of cin.get that takes a std::string. That’s why this fails:
+
+        std::string s;
+        cin.get(s, 11);  // ❌ compiler error: no matching function
+
+    Because the compiler looks through all the overloaded cin.get functions and sees:
+    “I don’t have one that matches (std::string, int).”
+
+
+3. Term clarified
+    So when I said:
+
+        “there is no overload of cin.get that accepts a std::string.”
+        I meant:
+        The cin.get family has several versions (overloads).
+        But none of them are written to accept a std::string as an argument.
+
+
+✅ Summary:
+
+    Overload in C++ means: same function name, different parameter list.
+    The compiler picks the correct version at compile time.
+    cin.get is overloaded for char, char*, etc.
+    It is not overloaded for std::string, so you can’t use it that way.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+3. What will be stored
+
+    If you type "Hello World!" into text[6], you won’t get just "Hello". Instead, you’ll overflow the array.
+    The first 6 slots will be filled ('H', 'e', 'l', 'l', 'o', maybe part of the space or null).
+    Then input keeps writing into memory that doesn’t belong to text.
+    That’s the danger — unlike std::string, a char[] has no built-in safety check.
+
+4. Safer alternative
+
+    With std::string, you don’t have this problem:
+        std::string text;
+        cin >> text;
+    Now if you type "Hello World!", it will safely store "Hello" (because >> stops at the space).
+    Or if you use getline(cin, text);, it will safely store the entire line, growing the string automatically.
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Pointer is a variable that points to the address of another variable. it stores address of another variable
+
+int a;
+int *p;
+p = &a;
+a = 5;
+print p;  //204 because this holds the address of the variable a
+print &a;  //204 
+print &p;  //64 this points to the address of variable p
+print *p;  //5 this returns the value of the variable a
+
+so:
+p -> Address which p holds
+*p -> value at address which p holds
+
+
+
+1. Declaring a pointer
+
+    If you want a pointer to an int, you declare it like this:
+        int *p;   // p is a pointer to int
+    Here, p itself does not point anywhere yet. It's uninitialized, so using it before assigning is dangerous.
+
+2. Making it point to an existing variable
+
+    You make a pointer point to a variable by using the address-of operator (&):
+
+        int b = 10;
+        int *p = &b;  // p now points to b
+
+    So now:
+    p holds the memory address of b.
+    *p (dereferencing) gives you the value of b.
+
+
+#include <iostream>
+using namespace std;
+int main()
+{
+    int a = 10;
+    int *b;
+    b= &a;
+    cout << "a= " << a << endl;
+    cout << "b= " << b << endl;
+    cout << "b= " << &b << endl;
+    cout << "b= " << *b << endl;
+    
+    *b = 40; // Here we have changed value of the variable which b is refering to. so b also will change
+    
+    cout << "a= " << a << endl;
+    cout << "b= " << b << endl;
+    cout << "b= " << &b << endl;
+    cout << "b= " << *b << endl;
+    return 0;
+}
+
+
+3. Important distinction
+
+    int p; → p is a regular integer variable (not a pointer).
+    int *p; → p is a pointer to an integer.
+    You cannot do something like:
+
+        int b = 10;
+        int p = &b; // ❌ WRONG: &b is an address, but p is just an int
+
+    That would be a type mismatch — &b has type int*, not int.
+
+
+
+    *p = 20;
+→ *p means “the value at the memory location that p points to”.
+Since p points to a, this line sets a = 20.
+
+Final result:
+
+    a == 20 ✅
+    b == 20 ✅ (unchanged after declaration)
+    *p == 20 ✅ (because p points to a)
+
+So yes — the value of a will change.
+
+⚡ Key point:
+    *p = 20; modifies the variable that p points to (in this case a).
+
+We can also write in both of the below forms:
+int* p = &a;
+int *p = &a;
+
+
+
+
+
+
+*/
