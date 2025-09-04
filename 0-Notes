@@ -344,6 +344,277 @@ int *p = &a;
 
 
 
+If we use just the name of the array it will point to the address of the first element in the array
+
+    int A[5] = {10, 20, 30, 40, 50};
+    int *p;
+    p=A;
+    cout << A << endl; // Address of the first element in the array like 200
+    cout << *A << endl; // Value stored in the first element of the array like 10
+    cout << A+1 << endl; // Address of the second element in the array like 204
+    cout << *(A+1) << endl; // Value stored in the second element of the array like 20
+
+    cout << A << endl; // Address of the first element in the array like 200
+    cout << &A[0] << endl; // Address of the first element in the array like 200
+    cout << A[0] << endl; // Value of the first element in the array like 10
+    cout << *A << endl; // Value of the first element in the array like 10
+
+
+    A++; // This is invalid and makes error
+    p++; // This is valid and will work
+
+Step 3: p = A;
+    Since A can be treated as the address of its first element:
+    A is equivalent to &A[0]
+    So now p = &A[0] (i.e., p points to the first element of the array).
+
+
+Step 4: print A;
+    If you try to std::cout << A; in C++:
+    It will print the memory address of the first element (like 0x7ffee....), not the whole array.
+    A is essentially a pointer here.
+
+
+Step 5: print *A;
+    *A means “the value stored at address A”
+    Since A == &A[0], dereferencing gives the first element: A[0].
+    So *A is exactly the same as A[0].    
+
+
+
+** To get the address of the second element in array we can use either of the below ways.
+
+    &A[i]
+    (A+1)
+
+** To get the value of the second element in array we can use either of the below ways.
+
+    A[i]
+    *(A+1)
+
+The address of the first element in the array can be called the base address
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Arrays as function arguments
+
+** Arrays are always passed to functions by the reference and not whole the array will be passed to the the function.
+it means that only the address of the first member of the array will be passed to the function
+
+int A[5];
+int *p = A; // This will put the address of the first element of A which is A[0] in the variable p
+print A; // this will be the address of the first element in array A for example 200
+print *A // this will be the value which the first address of the array A is storing for example 10
+print *(A+2) // this will be the value of the third element of array A which for example is 6
+
+** So for conclusion (A+i) is the same as A[i] which gives the address of the i+1 member of the array A
+** so for conclusion *(A+i) is the same and &A[i] which gives the address of the i+1 member of the array A
+
+
+
+
+    int A[5] = {10, 20, 30, 40, 50};
+    int size = sizeof(A);
+    int sizeofarray = sizeof(A)/sizeof(A[0]);
+    cout << size << endl;
+    cout << sizeofarray << endl;
+
+
+
+int B [2][3] // Here we are creating two 1-D arrays which each one has 3 member
+B[0]
+B[1]
+
+each on these 1-D arrays have 12 bytes length because of 3*4bytes = 12 bytes
+so for example B[0] starts from address 400 to 411 and the array B[1] starts from 412 to 423
+
+
+** Name of the array points to the address of the first member of the array
+
+B is a 2D array of type int[2][3].
+In most expressions, B decays into a pointer to its first row.
+So B is of type int (*)[3] (pointer to an array of 3 ints).
+
+
+
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int B[2][3];   // a 2x3 array
+
+        int *p = B;    // ❌ problem is here
+
+        return 0;
+    }
+
+here we have this situation:
+
+    int *p = B;   // trying to assign int (*)[3] to int*
+
+p expects a pointer to an int.
+But B decays to a pointer to an array of 3 ints (int (*)[3]).
+These are not the same type, so the compiler complains.
+
+
+
+Correct ways
+    If you really want p to point to the first element (an int):
+
+        int *p = &B[0][0];  // point to the very first int in the 2D array
+
+    If you want a pointer to a row:
+
+        int (*p)[3] = B;    // p is a pointer to an array of 3 ints
+
+    Now you can do:
+
+        cout << (*p)[0];   // first element of first row
+        p++;  
+
+
+🔹 Example 1: Accessing elements with int* p = &B[0][0];
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int B[2][3] = { {1, 2, 3}, {4, 5, 6} };
+
+        int *p = &B[0][0];   // pointer to the first int in the 2D array
+
+        // Print elements using pointer arithmetic
+        for (int i = 0; i < 6; i++) {
+            cout << *(p + i) << " ";
+        }
+        cout << endl;
+    }
+
+🔹 Output:
+    1 2 3 4 5 6
+
+
+
+🔹 Example 2: Pointer to a row (int (*p)[3] = B;)
+    #include <iostream>
+    using namespace std;
+
+    int main() {
+        int B[2][3] = { {1, 2, 3}, {4, 5, 6} };
+
+        int (*p)[3] = B;   // p points to a row of 3 integers
+
+        // Access elements row by row
+        cout << "First row: " << (*p)[0] << " " << (*p)[1] << " " << (*p)[2] << endl;
+
+        p++;   // move to next row (skips 3 ints)
+
+        cout << "Second row: " << (*p)[0] << " " << (*p)[1] << " " << (*p)[2] << endl;
+    }
+
+🔹 Output:
+    First row: 1 2 3
+    Second row: 4 5 6
+
+🔹 Explanation:
+
+    p is a pointer to an array of 3 ints.
+    *p dereferences to the whole row (int[3]).
+    (*p)[i] accesses elements within that row.
+    p++ moves to the next row (jumps by 3 ints at once).
+
+
+
+🔹 1. What does [3] mean in this declaration?
+    int (*p)[3] = B;
+
+    p is a pointer.
+    (*p)[3] means: "p points to an array of 3 integers".
+    So p has type pointer to array of 3 ints (int (*)[3]).
+    This is different from int *p (pointer to a single int).
+
+
+🔹 2. Is the row an array?
+
+Yes ✅ Each row in B is an array of 3 integers.
+
+For example:
+
+    int B[2][3] = { {1,2,3}, {4,5,6} };
+
+    B[0] → the first row, type int[3].
+    B[1] → the second row, type int[3].
+
+So when you write:
+    int (*p)[3] = B;
+
+    p = &B[0] // This means put the address of B[0] which is an aray of 3 ints in pointer p so pointer p should be defined as pointer 
+    with dimention of array of 3 ints
+
+    *p = B[0] (which is an array of 3 ints).
+
+
+
+🔹 3. Why can’t I just cout << *p; to print the row?
+
+    This is because of how arrays behave in C++:
+    *p is of type int[3] (array of 3 ints).
+    But in most expressions, an array decays into a pointer to its first element.
+    So *p decays into int* → pointer to (*p)[0].
+    That’s why:
+
+        cout << *p;
+    prints the address of the first element (&B[0][0]), not the whole array.
+
+    ⚡ Key point: C++ does not know how to print arrays directly with cout.
+    It only knows how to print scalars (int, double, etc.) and addresses (int*).
+
+
+
+🔹 4. “*p dereferences to the whole row” — what does that mean?
+
+    p → pointer to a row (int (*)[3]).
+    *p → the row itself (int[3]).
+
+    But as soon as you use *p in an expression (like with cout), it decays to int* (address of first element).
+    So in practice:
+    *p is conceptually the whole row {1,2,3}.
+    But C++ treats it as just the address of the first element.
+    That’s why you need a loop to see all elements:
+
+        for (int i = 0; i < 3; i++) {
+            cout << (*p)[i] << " ";
+        }
+
+    Output:
+        1 2 3
+
+
+
+1. Can you do cout << B[0]; ?
+
+        int B[2][3] = { {1,2,3}, {4,5,6} };
+        cout << B[0] << endl;
+
+    B[0] is the first row. Its type is int[3].
+    In most expressions (like here), it decays to a pointer → type int* (pointer to the first element of that row).
+    So cout << B[0]; will just print the address of B[0][0], not the values {1,2,3}.
+    ✅ If you want the row values, you must loop:
+
+        for (int i = 0; i < 3; i++) {
+            cout << B[0][i] << " ";
+        }
+
+    Output:
+
+        1 2 3
+
+
+
+
+
+
+
+
 
 
 
