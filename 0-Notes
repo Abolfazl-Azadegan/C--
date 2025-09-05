@@ -611,6 +611,694 @@ So when you write:
 
 
 
+#include <iostream>
+using namespace std;
+int main()
+{
+    int B[2][3]={{1,2,3},{4,5,6}};
+    
+    int *p = B[0];
+    // int *z = &B[0]; // This will generate compiler error
+    cout << &B[0][0] << endl;
+    cout << &B[0][1] << endl;
+    cout << &B[0][2] << endl;
+    cout << &B[1][0] << endl;
+    cout << &B[1][1] << endl;
+    cout << &B[1][2] << endl<<endl;
+    cout << p << endl;
+    cout << *p << endl;
+    cout << p+1 << endl;
+    cout << *(p+1) << endl;
+    return 0;
+}
+
+
+output:
+    0x7ffc3b3d95b0
+    0x7ffc3b3d95b4
+    0x7ffc3b3d95b8
+    0x7ffc3b3d95bc
+    0x7ffc3b3d95c0
+    0x7ffc3b3d95c4
+
+    0x7ffc3b3d95b0
+    1
+    0x7ffc3b3d95b4
+    2
+
+
+
+🔹 1. B[0]
+
+    B[0] is the first row, type int[3].
+    In most expressions, an array decays into a pointer to its first element → int*.
+    So:
+
+        B[0]   → int[3] → decays to int* → &B[0][0]
+
+    Example:
+
+        int *p = B[0];   // OK
+        cout << p;       // prints address of B[0][0]
+
+
+🔹 2. &B[0]
+
+    &B[0] means “the address of the entire first row”.
+    Type is pointer to an array of 3 ints → int (*)[3].
+    So:
+
+        &B[0]   → int (*)[3]
+
+    Example:
+
+        int (*z)[3] = &B[0];  // z points to the row (not just an int)
+        cout << z;            // prints same address as &B[0][0]
+
+
+🔹 3. Why do they both print the same address?
+
+    Because both ultimately refer to the same chunk of memory, the start of row 0:
+
+        B[0][0]   B[0][1]   B[0][2]   B[1][0]   B[1][1]   B[1][2]
+        ↑
+        |__ start of row 0  →  address(&B[0]) == address(B[0]) == address(&B[0][0])
+
+
+    So numerically the addresses are the same.
+    But semantically they’re different types:
+
+        B[0] (decayed) → int* (pointer to element).
+        &B[0] → int (*)[3] (pointer to row).
+
+
+🔹 4. Why does the type matter?
+
+    👉 Look at what happens when you increment:
+
+        int *p = B[0];     // points to B[0][0]
+        int (*z)[3] = &B[0]; // points to the row
+
+        cout << (p+1) << endl;   // moves by 1 int → points to B[0][1]
+        cout << (z+1) << endl;   // moves by 1 row → points to B[1][0]
+
+
+    ⚡ That’s the key difference:
+
+    int* moves by 1 element at a time.
+    int (*)[3] moves by 1 row at a time.
+
+✅ Summary
+
+    B[0] → row → decays to int* → points to first element of row.
+    &B[0] → address of row → int (*)[3].
+    Both print the same address, because the row starts at its first element.
+    But when you increment them:
+    p++ → walks inside the row.
+    z++ → jumps to the next row.
+
+
+
+    #include <iostream>
+    using namespace std;
+    int main()
+    {
+        int A[5] = {1,2,3,4,5};
+        int *p=A;
+        //int *x = &A; //This will generate error because &A is pointing to the address of the whole row just like the case above explained
+        //it is trying to convert ‘int (*)[5]’ to ‘int*’. The types are not matched
+        //int *y = A[0]; // this will generate error because it is trying to invalid conversion from ‘int’ to ‘int*’. we need to put the address of first element in array in pointer
+        int *z = &A[0];
+        
+        cout << p << endl;
+        cout << *p << endl;
+        cout << &p << endl;    
+        cout << z << endl;
+        cout << *z << endl;
+        cout << &z << endl;    
+
+        return 0;
+    }
+
+output:
+
+    0x7fff2f304350
+    1
+    0x7fff2f304340
+    0x7fff2f304350
+    1
+    0x7fff2f304348
+
+
+
+** SUMMARY
+print B = print &B[0] // This gives the address of the first row of the Array B which means B[0] but the compiler will point to the 
+                      // first element of that array B[0]
+
+
+    #include <iostream>
+    using namespace std;
+    int main()
+    {
+        int B[2][3]={{1,2,3},{4,5,9}};
+        
+        cout << "B: " << B << endl;
+        cout << "&B[0]: " << &B[0] << endl;
+        cout << "&B: " << &B << endl;
+        cout << "&B[0][0]: " << &B[0][0] << endl;
+        cout << "*B: " << *B << endl;
+        cout << "**B: " << **B << endl;
+        cout << "*B[0]: " << *B[0] << endl;
+        cout << "*(B+1): " << *(B+1) << endl;
+        cout << "*(B+1)+2: " << *(B+1)+2 << endl;
+        cout << "*(*(B+1)+2): " << *(*(B+1)+2) << endl;
+        cout << "**(B+1)+2: " << **(B+1)+2 << endl;
+        cout << "**((B+1)+1): " << **((B+1)+1) << endl;
+        cout << "*(*B+1): " << *(*B+1) << endl;
+        cout << "&B[0][1]: " << &B[0][1] << endl;
+        cout << "&B[0][2]: " << &B[0][2] << endl;
+        cout << "&B[1][0]: " << &B[1][0] << endl;
+        cout << "&B[1][1]: " << &B[1][1] << endl;
+        cout << "&B[1][2]: " << &B[1][2] << endl<<endl;
+        
+        
+        return 0;
+    }
+
+
+Output:
+    B: 0x7ffca5ac6000
+    &B[0]: 0x7ffca5ac6000
+    &B: 0x7ffca5ac6000
+    &B[0][0]: 0x7ffca5ac6000
+    *B: 0x7ffca5ac6000
+    **B: 1
+    *B[0]: 1
+    *(B+1): 0x7ffca5ac600c
+    *(B+1)+2: 0x7ffca5ac6014
+    *(*(B+1)+2): 9
+    **(B+1)+2: 6
+    **((B+1)+1): -453830400
+    *(*B+1): 2
+    &B[0][1]: 0x7ffca5ac6004
+    &B[0][2]: 0x7ffca5ac6008
+    &B[1][0]: 0x7ffca5ac600c
+    &B[1][1]: 0x7ffca5ac6010
+    &B[1][2]: 0x7ffca5ac6014
+
+
+🔹 Memory layout of B
+
+    B is a 2x3 array of ints:
+
+    B[0][0]  B[0][1]  B[0][2]  B[1][0]  B[1][1]  B[1][2]
+    1        2        3        4        5        6
+
+    In memory, these 6 ints are contiguous.
+
+
+
+
+✅ Why do many of them look the same?
+
+    Because they all refer to the start of the array in memory.
+    But the types are different, which affects pointer arithmetic:
+
+        B / &B[0] → type int (*)[3] (pointer to row).
+        &B → type int (*)[2][3] (pointer to whole 2x3 array).
+        &B[0][0] → type int* (pointer to element).
+        *B → row, decays to int* (pointer to first element).
+        *B[0] → value of first element = 1.
+
+
+
+🔹 What is B?
+        int B[2][3] = { {1,2,3}, {4,5,6} };
+
+
+    B is a 2D array: int[2][3].
+    In most expressions, B decays to:
+
+        int (*)[3]   // pointer to an array of 3 ints (a row)
+
+    So:
+        B → points to the first row.
+
+🔹 Case 1: B + 1
+
+    Type of B (after decay): int (*)[3].
+        That means "B is a pointer to an array of 3 ints."
+    When you do B+1, pointer arithmetic applies:
+
+        B+1 → moves forward by 1 row (int[3]).
+
+    Skips 3 integers (12 bytes if int=4).
+    So:
+
+        B       → &B[0] (address of row 0, {1,2,3})
+        B + 1   → &B[1] (address of row 1, {4,5,6})
+
+        ✅ B+1 = "go to the next row."
+
+
+🔹 Case 2: &B + 1
+
+        &B is the address of the entire array.
+        Type: int (*)[2][3] (pointer to a 2x3 array).
+
+    So &B + 1 means:
+
+        "Go forward by 1 whole array (int[2][3])."
+        That skips 6 integers (24 bytes if int=4).
+
+    So:
+
+        &B       → address of the whole 2x3 array
+        &B + 1   → address just past the entire array (like end pointer)
+
+
+
+🔹 Visual Layout
+
+    Memory for B:
+
+        Row 0:  [1][2][3]
+        Row 1:  [4][5][6]
+
+    Addresses (example):
+
+        & B[0][0] = 1000
+        & B[0][1] = 1004
+        & B[0][2] = 1008
+        & B[1][0] = 1012
+        & B[1][1] = 1016
+        & B[1][2] = 1020
+
+    Now:
+
+        B      = &B[0]   = 1000
+        B+1    = &B[1]   = 1012   (moved by 3 ints)
+
+        &B     = address of whole array = 1000
+        &B+1   = 1024    (moved by 6 ints, whole 2x3 block)
+
+
+✅ Summary
+
+    B → pointer to row → B+1 jumps to the next row.
+    &B → pointer to entire array → &B+1 jumps past the entire 2x3 array.
+
+
+
+
+
+Let’s carefully unpack why *B prints an address instead of the value.
+
+🔹 Step 1: What is B?
+
+    B is a 2D array: int B[2][3];
+    Type of B is int[2][3].
+    In most expressions, B decays into a pointer to its first row → int (*)[3].
+    So:
+        B   → type int (*)[3]   (pointer to a row of 3 ints)
+
+
+🔹 Step 2: What is *B?
+
+    If B is int (*)[3] (pointer to row),
+    then *B dereferences that pointer → the first row.
+    First row is an array: type int[3].
+    Now here’s the tricky part:
+    When you use an array (int[3]) in an expression, it decays to a pointer to its first element (int*).
+    So:
+
+        *B   → int[3]   → decays to int*   → points to B[0][0]
+
+
+🔹 Step 3: Why does cout << *B print an address?
+
+    Because after decay:
+
+        *B is int*
+
+    And std::cout has an overload for printing int*, which prints the address.
+    If you wanted the value, you need one more dereference:
+
+        cout << **B << endl;   // prints 1 (the first element B[0][0])
+
+
+🔹 Analogy
+
+    Think of B as:
+
+        B   = pointer to row
+        *B  = row = decays into pointer to first element
+        **B = value of first element
+
+
+
+🔹 Example Demo
+    int B[2][3] = {{1,2,3}, {4,5,6}};
+
+        cout << B      << endl;  // address of first row
+        cout << *B     << endl;  // address of first element (row decays to int*)
+        cout << **B    << endl;  // value of first element = 1
+
+    Output (addresses will differ):
+
+        0x7ffee3a1d9c0   // B
+        0x7ffee3a1d9c0   // *B
+        1                // **B
+
+
+
+🔹 Setup
+    int B[2][3] = { {1,2,3}, {4,5,6} };
+    cout << "*(B+1): " << *(B+1) << endl;
+
+
+
+🔹 Step 1: What is B?
+
+    B is a 2D array int[2][3].
+    In expressions, it decays into a pointer to the first row → type:
+        int (*)[3]   // pointer to an array of 3 ints
+
+    So:
+        B → &B[0] (points to row 0)
+
+
+
+🔹 Step 2: What is B+1?
+
+    Since B is a pointer to a row (int[3]):
+        B+1 moves one row forward (skips 3 ints).
+
+    So:
+        B+1 → &B[1] (address of row 1)
+
+
+
+🔹 Step 3: What is *(B+1)?
+
+    *(B+1) dereferences the pointer-to-row.
+    So it gives you row 1 → type int[3].
+    In expressions, that array decays to int* (pointer to its first element).
+
+    So:
+        *(B+1) → B[1] → int* pointing to B[1][0]
+
+
+
+🔹 Step 4: Printing it
+
+    cout << *(B+1); means you’re passing an int* to cout.
+    And as we said earlier: cout prints the address, not the value (for int*).
+    So the output will be:
+
+        *(B+1): 0x7ffee3a1d9d0   // (example address of B[1][0])
+
+
+
+🔹 How to get values instead
+
+    If you actually want to print elements of row 1:
+
+        cout << *(*(B+1)) << endl;     // prints 4   (B[1][0])
+        cout << *(*(B+1) + 1) << endl; // prints 5   (B[1][1])
+        cout << *(*(B+1) + 2) << endl; // prints 6   (B[1][2])
+
+
+✅ Final Answer
+        cout << "*(B+1): " << *(B+1) << endl;
+
+    prints the address of B[1][0] (the first element of the second row), not the value, because *(B+1) decays into int* and cout prints 
+    pointers as addresses.
+
+
+
+***Note:
+    For 2-D arrays we have:
+        B[i][j] = *(B[i]+j)
+        B[i][j] = *(*(B+i)+j)
+
+
+🔹 Step 1: What is B in a 2D array?
+    int B[2][3] = { {1,2,3}, {4,5,6} };
+
+    Type of B is array of 2 elements, each of type array of 3 ints → int[2][3].
+
+    In expressions, B decays into → pointer to the first row (int (*)[3]).
+
+    So:
+        B → &B[0] → pointer to row 0
+        *B → B[0] → row 0 itself (type: int[3], decays to int*)
+
+
+
+🔹 Step 2: First equivalence B[i][j] = *(B[i] + j)
+
+    B[i] means "the ith row" (type: int[3], decays to int*).
+    So B[i] is a pointer to the first element of row i.
+    Adding j → (B[i] + j) means "move j ints forward in row i".
+    Dereferencing → *(B[i] + j) = the jth element of row i.
+
+    Thus:
+        B[i][j] == *(B[i] + j)
+
+    ✔ Works exactly like with 1D arrays.
+
+
+🔹 Step 3: Second equivalence B[i][j] = *(*(B+i)+j)
+
+    B+i means "move i rows forward". Since each row is int[3], this skips i*3 integers.
+    *(B+i) dereferences → gives row i (type: int[3], decays to int*).
+    Now we’re back to the row pointer, same as B[i].
+    Then add j → (*(B+i)+j).
+    Finally dereference → *(*(B+i)+j) = element j of row i.
+
+    Thus:
+        B[i][j] == *(*(B+i)+j)
+
+
+
+🔹 Example in code
+        #include <iostream>
+        using namespace std;
+
+        int main() {
+            int B[2][3] = { {1,2,3}, {4,5,6} };
+
+            cout << B[1][2] << endl;         // normal access → 6
+            cout << *(B[1] + 2) << endl;     // same → 6
+            cout << *(*(B+1) + 2) << endl;   // same → 6
+        }
+
+    Output:
+
+        6
+        6
+        6
+
+
+Step 2: What is B[0]?
+
+    B[0] means: “the 0th row” → type is int[3].
+
+    When used in an expression, B[0] decays into int*.
+    → pointer to the first element of row 0 (&B[0][0]).
+
+    So:
+        B[0] == &B[0][0]
+
+
+
+Example array:
+int B[2][3] = { {1,2,3}, {4,5,6} };
+
+🔹 Table of expressions
+Expression	Type	Meaning	What cout prints (without *)
+B	int (*)[3]	Pointer to the first row (&B[0])	Address of row 0
+&B	int (*)[2][3]	Pointer to the whole 2×3 array	Address of the entire array (same numeric value as B, but different type)
+&B[0]	int (*)[3]	Pointer to the first row	Address of row 0 (same as B)
+&B[0][0]	int*	Pointer to the first element of row 0	Address of first integer
+*B	int[3] → decays to int*	The first row (array of 3 ints → decays to pointer to first element)	Address of first integer (&B[0][0])
+*B[0]	int	First element of row 0 (B[0][0])	Value 1
+*B[0][0] ❌	Not valid	B[0][0] is already an int, you can’t dereference an int.	Compiler error
+🔹 In code:
+#include <iostream>
+using namespace std;
+
+int main() {
+    int B[2][3] = { {1,2,3}, {4,5,6} };
+
+    cout << "B: " << B << endl;                // address of row 0
+    cout << "&B: " << &B << endl;              // address of whole array
+    cout << "&B[0]: " << &B[0] << endl;        // address of row 0
+    cout << "&B[0][0]: " << &B[0][0] << endl;  // address of first int
+
+    cout << "*B: " << *B << endl;              // address of first int (row 0 decays to int*)
+    cout << "*B[0]: " << *B[0] << endl;        // first int value → 1
+    // cout << "*B[0][0]" << *B[0][0] << endl; // ❌ invalid, would not compile
+}
+
+🔹 Example Output (addresses vary)
+B: 0x7ffee2cba0
+&B: 0x7ffee2cba0
+&B[0]: 0x7ffee2cba0
+&B[0][0]: 0x7ffee2cba0
+*B: 0x7ffee2cba0
+*B[0]: 1
+
+
+✅ Key points to remember:
+
+B, &B, and &B[0] all print the same numeric address, but have different types.
+
+B → pointer to row
+
+&B → pointer to whole array
+
+&B[0] → pointer to row 0
+
+*B = row 0 (decays to int* → prints address of first element).
+
+*B[0] = value of first element in row 0.
+
+You cannot dereference an int (*B[0][0] ❌).
+
+
+
+👉 B and &B[0] evaluate to the same address, but their types are different.
+
+🔹 Why?
+
+Take:
+
+int B[2][3] = { {1,2,3}, {4,5,6} };
+
+
+B → in most expressions, decays to type int (*)[3]
+(pointer to an array of 3 ints, i.e. a row).
+It points to the first row.
+
+&B[0] → “address of row 0” → also type int (*)[3].
+It also points to the first row.
+
+So in this case:
+
+B == &B[0]   // true, both are the same pointer value
+
+🔹 But &B is different:
+
+&B → type int (*)[2][3] (pointer to the whole 2×3 array).
+Same numeric address, but points to the whole block, not just one row.
+
+🔹 Demo
+#include <iostream>
+using namespace std;
+
+int main() {
+    int B[2][3] = { {1,2,3}, {4,5,6} };
+
+    cout << "B: " << B << endl;
+    cout << "&B[0]: " << &B[0] << endl;
+    cout << "&B: " << &B << endl;
+
+    if (B == &B[0]) cout << "B and &B[0] are equal\n";
+}
+
+
+Output (addresses differ per run):
+
+B: 0x7ffee2cba0
+&B[0]: 0x7ffee2cba0
+&B: 0x7ffee2cba0
+B and &B[0] are equal
+
+
+✅ Summary:
+
+B and &B[0] → same address, same type (int (*)[3]).
+
+&B → same numeric address, but different type (int (*)[2][3]).
+
+
+
+
+#include <iostream>
+using namespace std;
+int main()
+{
+    int B[2][3]={{1,2,3},{4,5,9}};
+    
+    cout << "B: " << B << endl;
+    cout << "&B[0]: " << &B[0] << endl;
+    cout << "&B: " << &B << endl;
+    cout << "&B+1: " << &B+1 << endl;
+    //cout << "&(B+1): " << &(B+1) << endl; // This will generate error
+    cout << "&B[0][0]: " << &B[0][0] << endl;
+    cout << "*B: " << *B << endl;
+    cout << "**B: " << **B << endl;
+    cout << "*B[0]: " << *B[0] << endl;
+    cout << "*(B+1): " << *(B+1) << endl;
+    cout << "*(B+1)+2: " << *(B+1)+2 << endl;
+    cout << "*(*(B+1)+2): " << *(*(B+1)+2) << endl;
+    cout << "**(B+1)+2: " << **(B+1)+2 << endl;
+    cout << "**((B+1)+1): " << **((B+1)+1) << endl;
+    cout << "*(*B+1): " << *(*B+1) << endl;
+    cout << "B+1: " << B+1 << endl;
+    cout << "B[0]: " << B[0] << endl;
+    cout << "B[1]: " << B[1] << endl;
+    cout << "&B[0][1]: " << &B[0][1] << endl;
+    cout << "&B[0][2]: " << &B[0][2] << endl;
+    cout << "&B[1][0]: " << &B[1][0] << endl;
+    cout << "&B[1][1]: " << &B[1][1] << endl;
+    cout << "&B[1][2]: " << &B[1][2] << endl<<endl;
+    
+    
+    return 0;
+}
+
+Output:
+    B: 0x7fff3634f600
+    &B[0]: 0x7fff3634f600
+    &B: 0x7fff3634f600
+    &B+1: 0x7fff3634f618
+    &B[0][0]: 0x7fff3634f600
+    *B: 0x7fff3634f600
+    **B: 1
+    *B[0]: 1
+    *(B+1): 0x7fff3634f60c
+    *(B+1)+2: 0x7fff3634f614
+    *(*(B+1)+2): 9
+    **(B+1)+2: 6
+    **((B+1)+1): -488209664
+    *(*B+1): 2
+    B+1: 0x7fff3634f60c
+    B[0]: 0x7fff3634f600
+    B[1]: 0x7fff3634f60c
+    &B[0][1]: 0x7fff3634f604
+    &B[0][2]: 0x7fff3634f608
+    &B[1][0]: 0x7fff3634f60c
+    &B[1][1]: 0x7fff3634f610
+    &B[1][2]: 0x7fff3634f614
+
+
+
+** in the expression B+1 we have B which gives us the address of the first element in row 1 and the type is int (*)[3] and +1 means
+go to the next row which is row 1
+
+
+
+
+
+
+
+
+
+
+
 
 
 
